@@ -83,8 +83,10 @@ public class PrincessDream extends ApplicationAdapter {
 
             if (!playerIsAtCenter()) {
                 player.x -= 400 * Gdx.graphics.getDeltaTime();
+
             } else if (backgroundX + 5 <= 0) {
                 backgroundX += 5;
+
             } else {
                 player.x -= 400 * Gdx.graphics.getDeltaTime();
             }
@@ -94,14 +96,17 @@ public class PrincessDream extends ApplicationAdapter {
 
             if (!playerIsAtCenter()) {
                 player.x += 400 * Gdx.graphics.getDeltaTime();
+
             } else if ((backgroundX + background.getWidth()) - 5 >= windowWidth) {
                 backgroundX -= 5;
+
             } else {
                 player.x += 400 * Gdx.graphics.getDeltaTime();
             }
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+
             if (!isJumping) {
                 isJumping = true;
                 maxJumpHeight = player.y + 200;
@@ -118,15 +123,18 @@ public class PrincessDream extends ApplicationAdapter {
 
     }
 
-    public void jump() {
+    private void jump() {
+
         if(!isJumping){
             return;
         }
+
         player.y += jumpDistance;
 
-        if(!isFalling){
+        if(!isFalling && jumpDistance >= 0.5){
             jumpDistance -=0.1;
-        } else{
+
+        } else if (jumpDistance <= 0.5){
             jumpDistance += 0.1;
         }
 
@@ -135,14 +143,12 @@ public class PrincessDream extends ApplicationAdapter {
             jumpDistance *= -1;
         }
 
-        if(isFalling && player.y <= 0){
+        if(isFalling && player.y < 0){
+
             System.out.println("AAA");
             player.y = 0;
             isFalling = false;
             isJumping = false;
-
         }
-
     }
-
 }
