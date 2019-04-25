@@ -14,4 +14,8 @@ public abstract class Platform {
         this.y = y;
         this.type = type;
     }
+
+    public float getY() {
+        return y;
+    }
 }

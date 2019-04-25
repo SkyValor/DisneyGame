@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.platforms.Platform;
 
 import java.util.List;
 
@@ -31,6 +32,15 @@ public class CollisionDetector {
         }
 
         return false;
+    }
+
+    public static Platform playerFallsOnPlatform(Rectangle player, List<Rectangle> smallPlatforms, List<Rectangle> bigPlatforms) {
+
+        for (Rectangle smallPlatform : smallPlatforms) {
+
+
+        }
+        return null;
     }
 
 }

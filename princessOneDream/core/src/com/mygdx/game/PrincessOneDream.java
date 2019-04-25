@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.platforms.Platform;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -263,7 +264,7 @@ public class PrincessOneDream extends ApplicationAdapter {
         Platform targetPlatform = CollisionDetector.playerFallsOnPlatform(player, smallPlatforms, bigPlatforms);
         // if player is falling and the feet collide with a platform, return to idle state
         if (isFalling && targetPlatform != null) {
-            returnToIdleState(targetPlatform.y);
+            returnToIdleState(targetPlatform.getY());
         }
 
         // if player is falling and reaches ground level, return to idle state
