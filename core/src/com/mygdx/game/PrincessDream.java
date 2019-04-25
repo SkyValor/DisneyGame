@@ -3,59 +3,36 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
-public class PrincessOneDream extends ApplicationAdapter {
+public class PrincessDream extends ApplicationAdapter {
 
     private final float windowWidth = 1200;
     private SpriteBatch batch;
-
     private Texture img;
     private Rectangle player;
     private boolean isJumping;
     private boolean isFalling;
-
     private float jumpDistance;
-    private final float defaultJumpDistance = 7;
     private float maxJumpHeight;
-    private String text;
-    private BitmapFontCache cache;
-    private BitmapFont font;
-
-    private Rectangle animalRec;
-    private Texture animalTex;
 
     private Texture background;
     private int backgroundX;
 
-    public PrincessOneDream(){
+    public PrincessDream(){
         isFalling = false;
         isJumping = false;
-        jumpDistance = defaultJumpDistance;
+        jumpDistance = 5;
     }
 
     @Override
 
     public void create() {
         batch = new SpriteBatch();
-        img = new Texture("walking3.png");
-        animalTex = new Texture("cow2.png");
-
-        font = new BitmapFont();
-        text = "";
-        cache = font.newFontCache();
-
-        animalRec = new Rectangle();
-        animalRec.x = 400;
-        animalRec.y = 0;
-        animalRec.width = animalTex.getWidth();
-        animalRec.height = animalTex.getHeight();
+        img = new Texture("badlogic.jpg");
 
         player = new Rectangle();
         player.x = 0;
@@ -65,6 +42,7 @@ public class PrincessOneDream extends ApplicationAdapter {
 
         background = new Texture("forestBuilt.jpeg");
         backgroundX = 0;
+
 	}
 
     @Override
@@ -72,13 +50,9 @@ public class PrincessOneDream extends ApplicationAdapter {
         Gdx.gl.glClearColor(1, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
-        batch.draw(background, backgroundX, 0);
+        batch.draw(background,backgroundX,0);
         batch.draw(img, player.x, player.y);
-        batch.draw(animalTex, animalRec.x, animalRec.y);
-        userInputs();
-        jump();
         batch.end();
-
         jump();
         userInputs();
     }
@@ -90,11 +64,6 @@ public class PrincessOneDream extends ApplicationAdapter {
         background.dispose();
     }
 
-    /**
-     * Checks if player is at the middle of window
-     *
-     * @return true if player is at the middle; false otherwise
-     */
     private boolean playerIsAtCenter() {
 
         float playerCenter = (player.x + (player.x + player.width)) / 2;
@@ -108,10 +77,6 @@ public class PrincessOneDream extends ApplicationAdapter {
         return false;
     }
 
-    /**
-     * Receives input from keyboard for player or
-     * other assets' movement
-     */
     private void userInputs() {
 
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
@@ -148,15 +113,6 @@ public class PrincessOneDream extends ApplicationAdapter {
             }
         }
 
-        if (player.overlaps(animalRec) ) {
-            if (player.x < animalRec.x){
-                player.x = animalRec.getX() - player.width;
-            } else {
-                player.x = animalRec.getX() + animalRec.width;
-            }
-            renderSingleLine();
-        }
-
         if (player.x < 0) {
             player.x = 0;
         }
@@ -167,10 +123,6 @@ public class PrincessOneDream extends ApplicationAdapter {
 
     }
 
-    /**
-     * Method for ascending and descending the player
-     * Calls collision with Blocks
-     */
     private void jump() {
 
         if(!isJumping){
@@ -182,10 +134,8 @@ public class PrincessOneDream extends ApplicationAdapter {
         if(!isFalling && jumpDistance >= 0.5){
             jumpDistance -=0.1;
 
-        }
-
-        if (isFalling && jumpDistance <= -0.5){
-            jumpDistance -= 0.1;
+        } else if (jumpDistance <= 0.5){
+            jumpDistance += 0.1;
         }
 
         if(!isFalling && player.y >= maxJumpHeight){
@@ -193,23 +143,12 @@ public class PrincessOneDream extends ApplicationAdapter {
             jumpDistance *= -1;
         }
 
-        if(isFalling && player.y <= 0){
+        if(isFalling && player.y < 0){
 
+            System.out.println("AAA");
             player.y = 0;
-            jumpDistance = defaultJumpDistance;
             isFalling = false;
             isJumping = false;
-
         }
-
     }
-
-    private void renderSingleLine() {
-        text = "gay";
-        cache.setText(Messages.HELLO, animalRec.getX() + 10, animalRec.getY() + animalRec.height + 35);
-        cache.setColors(Color.BLACK);
-
-        cache.draw(batch);
-    }
-
 }
