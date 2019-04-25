@@ -11,9 +11,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PrincessOneDream extends ApplicationAdapter {
 
     private final float windowWidth = 1200;
+    private final float groundHeight = 100;
     private SpriteBatch batch;
 
     private Texture img;
@@ -24,6 +28,7 @@ public class PrincessOneDream extends ApplicationAdapter {
     private float jumpDistance;
     private final float defaultJumpDistance = 7;
     private float maxJumpHeight;
+
     private String text;
     private BitmapFontCache cache;
     private BitmapFont font;
@@ -34,6 +39,11 @@ public class PrincessOneDream extends ApplicationAdapter {
     private Texture background;
     private int backgroundX;
 
+    private Texture smallPlatform;
+    private Texture bigPlatform;
+    private List<Rectangle> smallPlatforms;
+    private List<Rectangle> bigPlatforms;
+
     public PrincessOneDream(){
         isFalling = false;
         isJumping = false;
@@ -41,7 +51,6 @@ public class PrincessOneDream extends ApplicationAdapter {
     }
 
     @Override
-
     public void create() {
         batch = new SpriteBatch();
         img = new Texture("walking3.png");
@@ -53,34 +62,46 @@ public class PrincessOneDream extends ApplicationAdapter {
 
         animalRec = new Rectangle();
         animalRec.x = 400;
-        animalRec.y = 0;
+        animalRec.y = groundHeight;
         animalRec.width = animalTex.getWidth();
         animalRec.height = animalTex.getHeight();
 
         player = new Rectangle();
-        player.x = 0;
-        player.y = 0;
-        player.width = 50;
-        player.height = 150;
+        player.x = 10;
+        player.y = groundHeight;
+        player.width = img.getWidth();
+        player.height = img.getHeight();
 
         background = new Texture("forestBuilt.jpeg");
         backgroundX = 0;
+
+        smallPlatform = new Texture("asset_small.png");
+        bigPlatform = new Texture("asset_big.png");
+        smallPlatforms = new ArrayList<>();
+        bigPlatforms = new ArrayList<>();
+
+        smallPlatforms.add(new Rectangle(300, 100, smallPlatform.getWidth(), smallPlatform.getHeight()));
+        smallPlatforms.add(new Rectangle(600, 350, smallPlatform.getWidth(), smallPlatform.getHeight()));
 	}
 
     @Override
     public void render() {
+
         Gdx.gl.glClearColor(1, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         batch.begin();
         batch.draw(background, backgroundX, 0);
         batch.draw(img, player.x, player.y);
         batch.draw(animalTex, animalRec.x, animalRec.y);
+
+        for (Rectangle platform : smallPlatforms) {
+            batch.draw(smallPlatform, platform.x, platform.y, 110, 60);
+        }
+
         userInputs();
         jump();
         batch.end();
-
-        jump();
-        userInputs();
     }
 
     @Override
@@ -88,6 +109,9 @@ public class PrincessOneDream extends ApplicationAdapter {
         batch.dispose();
         img.dispose();
         background.dispose();
+        animalTex.dispose();
+        smallPlatform.dispose();
+        bigPlatform.dispose();
     }
 
     /**
@@ -116,11 +140,20 @@ public class PrincessOneDream extends ApplicationAdapter {
 
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
 
+            Rectangle mockRectangle = new Rectangle(player.x - 400 * Gdx.graphics.getDeltaTime(), player.y, player.width, player.height);
+
+            for (Rectangle smallPlatform : smallPlatforms) {
+                if (smallPlatform.contains(mockRectangle)) {
+                    return;
+                }
+            }
+
             if (!playerIsAtCenter()) {
                 player.x -= 400 * Gdx.graphics.getDeltaTime();
 
             } else if (backgroundX + 5 <= 0) {
                 backgroundX += 5;
+                animalRec.x += 5;
 
             } else {
                 player.x -= 400 * Gdx.graphics.getDeltaTime();
@@ -129,11 +162,20 @@ public class PrincessOneDream extends ApplicationAdapter {
 
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
 
+            Rectangle mockRectangle = new Rectangle(player.x + 400 * Gdx.graphics.getDeltaTime(), player.y, player.width, player.height);
+
+            for (Rectangle bigPlatform : bigPlatforms) {
+                if (bigPlatform.contains(mockRectangle)) {
+                    return;
+                }
+            }
+
             if (!playerIsAtCenter()) {
                 player.x += 400 * Gdx.graphics.getDeltaTime();
 
             } else if ((backgroundX + background.getWidth()) - 5 >= windowWidth) {
                 backgroundX -= 5;
+                animalRec.x -= 5;
 
             } else {
                 player.x += 400 * Gdx.graphics.getDeltaTime();
@@ -149,11 +191,14 @@ public class PrincessOneDream extends ApplicationAdapter {
         }
 
         if (player.overlaps(animalRec) ) {
+
             if (player.x < animalRec.x){
                 player.x = animalRec.getX() - player.width;
+
             } else {
                 player.x = animalRec.getX() + animalRec.width;
             }
+
             renderSingleLine();
         }
 
@@ -193,21 +238,22 @@ public class PrincessOneDream extends ApplicationAdapter {
             jumpDistance *= -1;
         }
 
-        if(isFalling && player.y <= 0){
+        if(isFalling && player.y <= groundHeight){
 
-            player.y = 0;
+            player.y = groundHeight;
             jumpDistance = defaultJumpDistance;
             isFalling = false;
             isJumping = false;
-
         }
+
+
 
     }
 
     private void renderSingleLine() {
         text = "gay";
         cache.setText(Messages.HELLO, animalRec.getX() + 10, animalRec.getY() + animalRec.height + 35);
-        cache.setColors(Color.BLACK);
+        cache.setColors(Color.WHITE);
 
         cache.draw(batch);
     }
