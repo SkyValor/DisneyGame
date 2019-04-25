@@ -4,65 +4,100 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 public class PrincessDream extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
-	private Rectangle player;
-	
-	@Override
-	public void create () {
-		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
 
-		//player move
-		player = new Rectangle();
-		player.x = 0;
-		player.y = 0;
-		player.width = 50;
-		player.height = 150;
+    private final float windowWidth = 1200;
+    SpriteBatch batch;
+    Texture img;
+    private Rectangle player;
+    private Texture background;
+    private int backgroundX;
 
-	}
+    @Override
 
-	@Override
-	public void render () {
-		Gdx.gl.glClearColor(1, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		batch.begin();
-		batch.draw(img, player.x, player.y);
-		batch.end();
-		userInputs();
-	}
-	
-	@Override
-	public void dispose () {
-		batch.dispose();
-		img.dispose();
-	}
+    public void create() {
+        batch = new SpriteBatch();
+        img = new Texture("badlogic.jpg");
+        background = new Texture("forestBuilt.jpeg");
+        backgroundX = 0;
 
-	private void userInputs() {
+        //player move
+        player = new Rectangle();
+        player.x = 0;
+        player.y = 0;
+        player.width = 50;
+        player.height = 150;
 
+    }
 
-		if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
-			player.x -= 400 * Gdx.graphics.getDeltaTime();
-		}
+    @Override
+    public void render() {
+        Gdx.gl.glClearColor(1, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-			player.x += 400 * Gdx.graphics.getDeltaTime();
-		}
+        batch.begin();
+        batch.draw(background, backgroundX, 0);
+        batch.draw(img, player.x, player.y);
+        batch.end();
+        userInputs();
+    }
 
+    @Override
+    public void dispose() {
+        batch.dispose();
+        img.dispose();
+        background.dispose();
+    }
 
-		if (player.x < 0) {
-			player.x = 0;
-		}
+    private boolean playerIsAtCenter() {
 
-		if (player.x > 940) {
-			player.x = 940;
-		}
+        float playerCenter = (player.x + (player.x + player.width)) / 2;
+        float windowCenter = windowWidth / 2;
+        int toleranceMargin = 30;
 
+        if (playerCenter > windowCenter - toleranceMargin && playerCenter < windowCenter + toleranceMargin) {
+            return true;
+        }
 
-	}
+        return false;
+    }
+
+    private void userInputs() {
+
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
+
+            if (!playerIsAtCenter()) {
+                player.x -= 400 * Gdx.graphics.getDeltaTime();
+            } else if (backgroundX + 5 <= 0) {
+                backgroundX += 5;
+            } else {
+                player.x -= 400 * Gdx.graphics.getDeltaTime();
+            }
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
+
+            if (!playerIsAtCenter()) {
+                player.x += 400 * Gdx.graphics.getDeltaTime();
+            } else if ((backgroundX + background.getWidth()) - 5 >= windowWidth) {
+                backgroundX -= 5;
+            } else {
+                player.x += 400 * Gdx.graphics.getDeltaTime();
+            }
+        }
+
+        if (player.x < 0) {
+            player.x = 0;
+        }
+
+        if (player.x > 940) {
+            player.x = 940;
+        }
+
+    }
 }
