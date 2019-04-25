@@ -24,6 +24,7 @@ public class PrincessOneDream extends ApplicationAdapter {
     private Rectangle player;
     private boolean isJumping;
     private boolean isFalling;
+    private boolean isGrounded;
 
     private float jumpDistance;
     private final float defaultJumpDistance = 7;
@@ -47,6 +48,7 @@ public class PrincessOneDream extends ApplicationAdapter {
     public PrincessOneDream(){
         isFalling = false;
         isJumping = false;
+        isGrounded = false;
         jumpDistance = defaultJumpDistance;
     }
 
@@ -80,8 +82,8 @@ public class PrincessOneDream extends ApplicationAdapter {
         smallPlatforms = new ArrayList<>();
         bigPlatforms = new ArrayList<>();
 
-        smallPlatforms.add(new Rectangle(300, 100, smallPlatform.getWidth(), smallPlatform.getHeight()));
-        smallPlatforms.add(new Rectangle(600, 350, smallPlatform.getWidth(), smallPlatform.getHeight()));
+        smallPlatforms.add(new Rectangle(300, 100, 110, 60));
+        smallPlatforms.add(new Rectangle(600, 350, 110, 60));
 	}
 
     @Override
@@ -133,7 +135,7 @@ public class PrincessOneDream extends ApplicationAdapter {
     }
 
     /**
-     * Receives input from keyboard for player or
+     * Receives input from keyboard for player and
      * other assets' movement
      */
     private void userInputs() {
@@ -142,10 +144,8 @@ public class PrincessOneDream extends ApplicationAdapter {
 
             Rectangle mockRectangle = new Rectangle(player.x - 400 * Gdx.graphics.getDeltaTime(), player.y, player.width, player.height);
 
-            for (Rectangle smallPlatform : smallPlatforms) {
-                if (smallPlatform.contains(mockRectangle)) {
-                    return;
-                }
+            if (CollisionDetector.playerAndPlatforms(mockRectangle, smallPlatforms, bigPlatforms)) {
+                return;
             }
 
             if (!playerIsAtCenter()) {
@@ -154,6 +154,7 @@ public class PrincessOneDream extends ApplicationAdapter {
             } else if (backgroundX + 5 <= 0) {
                 backgroundX += 5;
                 animalRec.x += 5;
+                movePlatforms(5);
 
             } else {
                 player.x -= 400 * Gdx.graphics.getDeltaTime();
@@ -164,10 +165,8 @@ public class PrincessOneDream extends ApplicationAdapter {
 
             Rectangle mockRectangle = new Rectangle(player.x + 400 * Gdx.graphics.getDeltaTime(), player.y, player.width, player.height);
 
-            for (Rectangle bigPlatform : bigPlatforms) {
-                if (bigPlatform.contains(mockRectangle)) {
-                    return;
-                }
+            if (CollisionDetector.playerAndPlatforms(mockRectangle, smallPlatforms, bigPlatforms)) {
+                return;
             }
 
             if (!playerIsAtCenter()) {
@@ -176,6 +175,7 @@ public class PrincessOneDream extends ApplicationAdapter {
             } else if ((backgroundX + background.getWidth()) - 5 >= windowWidth) {
                 backgroundX -= 5;
                 animalRec.x -= 5;
+                movePlatforms(-5);
 
             } else {
                 player.x += 400 * Gdx.graphics.getDeltaTime();
@@ -186,6 +186,7 @@ public class PrincessOneDream extends ApplicationAdapter {
 
             if (!isJumping) {
                 isJumping = true;
+                isGrounded = false;
                 maxJumpHeight = player.y + 200;
             }
         }
@@ -209,7 +210,22 @@ public class PrincessOneDream extends ApplicationAdapter {
         if (player.x > 940) {
             player.x = 940;
         }
+    }
 
+    /**
+     * Moves all platforms according to player input, when necessary
+     *
+     * @param deltaX the distance to move in the X-axis
+     */
+    private void movePlatforms(float deltaX) {
+
+        for (Rectangle platform : smallPlatforms) {
+            platform.x += deltaX;
+        }
+
+        for (Rectangle platform : bigPlatforms) {
+            platform.x += deltaX;
+        }
     }
 
     /**
@@ -218,36 +234,51 @@ public class PrincessOneDream extends ApplicationAdapter {
      */
     private void jump() {
 
+        // if player is not in mid-air, ignore this method
         if(!isJumping){
             return;
         }
 
         player.y += jumpDistance;
 
+        // if player is going up, decrement the amount of travel distance for each tick
+        // until a maximum value
         if(!isFalling && jumpDistance >= 0.5){
             jumpDistance -=0.1;
 
         }
 
+        // if the player is going down, increment the amount of travel distance for each tick
+        // until a maximum value
         if (isFalling && jumpDistance <= -0.5){
             jumpDistance -= 0.1;
         }
 
+        // if player reaches its target Y while going up, invert the travel direction
         if(!isFalling && player.y >= maxJumpHeight){
             isFalling = true;
             jumpDistance *= -1;
         }
 
-        if(isFalling && player.y <= groundHeight){
-
-            player.y = groundHeight;
-            jumpDistance = defaultJumpDistance;
-            isFalling = false;
-            isJumping = false;
+        Platform targetPlatform = CollisionDetector.playerFallsOnPlatform(player, smallPlatforms, bigPlatforms);
+        // if player is falling and the feet collide with a platform, return to idle state
+        if (isFalling && targetPlatform != null) {
+            returnToIdleState(targetPlatform.y);
         }
 
+        // if player is falling and reaches ground level, return to idle state
+        if(isFalling && player.y <= groundHeight){
+            returnToIdleState(groundHeight);
+        }
+    }
 
+    private void returnToIdleState(float targetY) {
 
+        player.y = targetY;
+        jumpDistance = defaultJumpDistance;
+        isFalling = false;
+        isJumping = false;
+        isGrounded = true;
     }
 
     private void renderSingleLine() {
