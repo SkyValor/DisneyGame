@@ -174,8 +174,8 @@ public class PrincessOneDream extends ApplicationAdapter {
     }
 
     private void renderSingleLine() {
-        text = "Daniel é gay";
-        cache.setText(text, animalRec.getX() + 10, animalRec.getY() + animalRec.height + 35);
+        text = "gay";
+        cache.setText(Messages.HELLO, animalRec.getX() + 10, animalRec.getY() + animalRec.height + 35);
         cache.setColors(Color.BLACK);
 
         cache.draw(batch);
