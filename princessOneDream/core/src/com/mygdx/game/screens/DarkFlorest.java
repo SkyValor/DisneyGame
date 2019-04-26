@@ -53,7 +53,7 @@ public class DarkFlorest implements Screen {
     public void create() {
 
         img = new Texture("walking3.png");
-        thunder = new Texture("bunny2.png");
+        thunder = new Texture("thunder.png");
         player = new Rectangle();
         player.x = 10;
         player.y = groundHeight;
@@ -92,7 +92,7 @@ public class DarkFlorest implements Screen {
     private void spawn() {
         Rectangle thunder = new Rectangle();
         thunder.x = MathUtils.random(0,900);
-        thunder.y = 600;
+        thunder.y = 700;
         thunder.width = 30;
         thunder.height = 30;
         thunders.add(thunder);
@@ -105,7 +105,7 @@ public class DarkFlorest implements Screen {
         while (iterator.hasNext()) {
 
             Rectangle thunder = iterator.next();
-            thunder.y -= 200 * Gdx.graphics.getDeltaTime();
+            thunder.y -= 400 * Gdx.graphics.getDeltaTime();
 
             if (thunder.y + 30 < 0) {
                 iterator.remove();
