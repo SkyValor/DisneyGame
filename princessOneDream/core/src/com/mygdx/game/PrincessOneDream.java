@@ -6,9 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.platforms.Platform;
 
@@ -20,6 +18,10 @@ public class PrincessOneDream extends ApplicationAdapter {
     private final float windowWidth = 1200;
     private final float groundHeight = 100;
     private SpriteBatch batch;
+
+    TextureRegion[] animationFrames;
+    Animation<TextureRegion> animation;
+    float elapsedTime;
 
     private Texture img;
     private Rectangle player;
@@ -56,8 +58,21 @@ public class PrincessOneDream extends ApplicationAdapter {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        img = new Texture("walking3.png");
+        img = new Texture("prince.png");
         animalTex = new Texture("cow2.png");
+
+        TextureRegion[][] tmpFrames = TextureRegion.split(img,103,190);
+
+        animationFrames = new TextureRegion[4];
+        int index = 0;
+
+        for (int i = 0; i < 2; i++){
+            for(int j = 0; j < 2; j++) {
+                animationFrames[index++] = tmpFrames[j][i];
+            }
+        }
+
+        animation = new Animation<>(1f/4f,animationFrames);
 
         font = new BitmapFont();
         text = "";
@@ -72,8 +87,8 @@ public class PrincessOneDream extends ApplicationAdapter {
         player = new Rectangle();
         player.x = 10;
         player.y = groundHeight;
-        player.width = img.getWidth();
-        player.height = img.getHeight();
+        player.width = 103;
+        player.height = 190;
 
         background = new Texture("forestBuilt.jpeg");
         backgroundX = 0;
@@ -92,10 +107,11 @@ public class PrincessOneDream extends ApplicationAdapter {
 
         Gdx.gl.glClearColor(1, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        elapsedTime += Gdx.graphics.getDeltaTime();
 
         batch.begin();
         batch.draw(background, backgroundX, 0);
-        batch.draw(img, player.x, player.y);
+        batch.draw(animation.getKeyFrame(elapsedTime,true), player.x, player.y);
         batch.draw(animalTex, animalRec.x, animalRec.y);
 
         for (Rectangle platform : smallPlatforms) {
