@@ -12,9 +12,20 @@ public class Messages {
 
     public static final String SLEEP = "She's sleeping, you're the ONLY one that can save her";
 
-    public static final String NEXTLEVEL = "In another level there will be more obstacles, you must pass them";
+    public static final String NEXTLEVEL = "I love when the sun paints a golden hue on everything";
 
-    public static final String SHE = "Piu Piu Piu";
+    public static final String SHE = "Find the other animals";
+
+    public static final String nextAnimal = "What is blue and it flies?";
+
+    public static final String squirl = "the next animal likes to climb threes";
+
+    public static final String bunny = "Hop Hop Hop";
+
+    public static final String thunder = "You should be careful with the dark";
+
+    public static final String thunderKill = "Thunders can KILL you!";
+
 
 
 }

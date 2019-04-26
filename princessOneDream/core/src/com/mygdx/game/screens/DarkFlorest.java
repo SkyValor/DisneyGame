@@ -3,9 +3,12 @@ package com.mygdx.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -19,6 +22,9 @@ public class DarkFlorest implements Screen {
     private final float windowWidth = 1200;
     private final float groundHeight = 100;
     private SpriteBatch batch;
+    TextureRegion[] animationFrames;
+    Animation<TextureRegion> animation;
+    float elapsedTime;
 
     private Texture thunder;
     private Texture img;
@@ -26,11 +32,13 @@ public class DarkFlorest implements Screen {
     private boolean isJumping;
     private boolean isFalling;
     private boolean isGrounded;
+    private int life;
 
     private float jumpDistance;
     private final float defaultJumpDistance = 7;
     private float maxJumpHeight;
     private long thunderRate;
+    private Sound sound;
 
 
     private Texture background;
@@ -48,22 +56,35 @@ public class DarkFlorest implements Screen {
         isGrounded = false;
         jumpDistance = defaultJumpDistance;
         create();
+        life = 10;
     }
 
     public void create() {
+        img = new Texture("prince.png");
+        TextureRegion[][] tmpFrames = TextureRegion.split(img,103,190);
 
-        img = new Texture("walking3.png");
+        animationFrames = new TextureRegion[4];
+        int index = 0;
+
+        for (int i = 0; i < 2; i++){
+            for(int j = 0; j < 2; j++) {
+                animationFrames[index++] = tmpFrames[j][i];
+            }
+        }
+
+        animation = new Animation<>(1f/4f,animationFrames);
         thunder = new Texture("thunder.png");
         player = new Rectangle();
         player.x = 10;
         player.y = groundHeight;
-        player.width = img.getWidth();
-        player.height = img.getHeight();
+        player.width = 103;
+        player.height = 190;
 
         thunders = new Array<>();
 
         background = new Texture("forestBuilt_dark.jpeg");
         backgroundX = 0;
+        sound = Gdx.audio.newSound(Gdx.files.internal("Thunder  Lightning .mp3"));
 
         spawn();
 
@@ -72,13 +93,16 @@ public class DarkFlorest implements Screen {
 
     @Override
     public void render(float delta) {
+        princessOneDream.music.stop();
 
         Gdx.gl.glClearColor(1, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        elapsedTime += Gdx.graphics.getDeltaTime();
 
         batch.begin();
         batch.draw(background, backgroundX, 0);
-        batch.draw(img, player.x, player.y);
+        batch.draw(animation.getKeyFrame(elapsedTime,true), player.x, player.y);
+
         for(Rectangle thunder: thunders){
             batch.draw(this.thunder,thunder.x,thunder.y);
         }
@@ -112,6 +136,8 @@ public class DarkFlorest implements Screen {
             }
 
             if (thunder.overlaps(player)) {
+                life --;
+                sound.play();
                 iterator.remove();
             }
 
