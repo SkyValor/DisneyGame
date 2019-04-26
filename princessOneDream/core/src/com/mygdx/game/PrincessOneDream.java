@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.animals.Animal;
 import com.mygdx.game.animals.AnimalImpl;
+import com.mygdx.game.platforms.BigPlatform;
 import com.mygdx.game.platforms.Platform;
 import com.mygdx.game.platforms.PlatformType;
 import com.mygdx.game.platforms.SmallPlatform;
@@ -27,20 +28,24 @@ public class PrincessOneDream extends ApplicationAdapter {
 
     private final float windowWidth = 1200;
     private final float groundHeight = 100;
-    private final float defaultJumpDistance = 7;
     private SpriteBatch batch;
+
+    private final float defaultJumpDistance = 7;
 
     private Texture playerImage;
     private Player player;
     private float jumpDistance;
     private float maxJumpHeight;
 
-    private String text;
     private BitmapFontCache cache;
     private BitmapFont font;
 
-    private Animal cow;
-    private Texture cowImage;
+    private Animal squirrel;
+    private Animal bird;
+    private Animal owl;
+    private Animal bunny2;
+    private Animal bird3;
+    private Animal bunny;
 
     private Texture background;
     private int backgroundX;
@@ -61,7 +66,6 @@ public class PrincessOneDream extends ApplicationAdapter {
         batch = new SpriteBatch();
 
         font = new BitmapFont();
-        text = "";
         cache = font.newFontCache();
 
         //
@@ -77,11 +81,20 @@ public class PrincessOneDream extends ApplicationAdapter {
         //
         // ANIMALS
 
-        cowImage = new Texture("cow2.png");
-        cow = new AnimalImpl(400, groundHeight, cowImage.getWidth(), cowImage.getHeight(), Messages.HELLO);
+        squirrel = new AnimalImpl(400, groundHeight, new Texture("squirrel.png"), Messages.HELLO);
+        bird = new AnimalImpl(120, 500, new Texture("bird.png"), "Insert message here");
+        owl = new AnimalImpl(2670, 500, new Texture("owl.png"), "Insert message here");
+        bunny2 = new AnimalImpl(2500, groundHeight, new Texture("bunny2.png"), "Insert message here");
+        bird3 = new AnimalImpl(3780, 500, new Texture("bird3.png"), "Insert message here");
+        bunny = new AnimalImpl(5000, groundHeight, new Texture("bunny.png"), "Insert message here");
 
         animals = new ArrayList<>();
-        animals.add(cow);
+        animals.add(squirrel);
+        animals.add(bird);
+        animals.add(owl);
+        animals.add(bunny2);
+        animals.add(bird3);
+        animals.add(bunny);
 
         //
         // BACKGROUND
@@ -96,8 +109,17 @@ public class PrincessOneDream extends ApplicationAdapter {
         bigPlatform = new Texture("asset_big.png");
 
         platforms = new ArrayList<>();
-        platforms.add(new SmallPlatform(100, 450));
-        platforms.add(new SmallPlatform(600, 350));
+        platforms.add(new BigPlatform(100, 450));
+        platforms.add(new SmallPlatform(540, 450));
+        platforms.add(new BigPlatform(700, 300));
+        platforms.add(new BigPlatform(1250, 150));
+        platforms.add(new SmallPlatform(1800, 300));
+        platforms.add(new SmallPlatform(2200, 375));
+        platforms.add(new BigPlatform(2500, 450));
+        platforms.add(new BigPlatform(2750, 150));
+        platforms.add(new BigPlatform(3700, 450));
+        platforms.add(new SmallPlatform(4050, 150));
+        platforms.add(new SmallPlatform(4350, 300));
     }
 
     @Override
@@ -114,10 +136,14 @@ public class PrincessOneDream extends ApplicationAdapter {
             if (platform.getType().equals(PlatformType.SMALL)) {
                 batch.draw(smallPlatform, platform.getCollider().x, platform.getCollider().y, platform.getWidth(), platform.getHeight());
             }
+
+            if (platform.getType().equals(PlatformType.BIG)) {
+                batch.draw(bigPlatform, platform.getCollider().x, platform.getCollider().y, platform.getWidth(), platform.getHeight());
+            }
         }
 
         for (Animal animal : animals) {
-            batch.draw(cowImage, animal.getCollider().x, animal.getCollider().y);
+            batch.draw(animal.getImage(), animal.getCollider().x, animal.getCollider().y);
         }
 
         batch.draw(playerImage, player.getX(), player.getY());
@@ -136,7 +162,9 @@ public class PrincessOneDream extends ApplicationAdapter {
         playerImage.dispose();
         background.dispose();
 
-        cowImage.dispose();
+        for (Animal animal : animals) {
+            animal.dispose();
+        }
 
         smallPlatform.dispose();
         bigPlatform.dispose();
@@ -400,8 +428,8 @@ public class PrincessOneDream extends ApplicationAdapter {
      * Renders the animal's line on top of it [TESTING ONLY]
      */
     private void renderSingleLine(Animal animal) {
-        text = "something";
-        cache.setText(Messages.HELLO, animal.getCollider().x + 10, animal.getCollider().y + animal.getCollider().height + 35);
+
+        cache.setText(animal.getSentence(), animal.getCollider().x + 10, animal.getCollider().y + animal.getCollider().height + 35);
         cache.setColors(Color.WHITE);
 
         cache.draw(batch);

@@ -1,12 +1,15 @@
 package com.mygdx.game.animals;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 
 public interface Animal {
 
-    String getSentence();
+    void dispose();
 
-    void setSentence(String sentence);
+    Texture getImage();
+
+    String getSentence();
 
     Rectangle getCollider();
 

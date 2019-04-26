@@ -1,25 +1,34 @@
 package com.mygdx.game.animals;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 
 public class AnimalImpl implements Animal {
 
+    private Texture image;
     private Rectangle collider;
     private String sentence;
     private boolean hasTalked;
 
-    public AnimalImpl(float x, float y, float width, float height, String sentence) {
-        collider = new Rectangle(x, y, width, height);
+    public AnimalImpl(float x, float y, Texture image, String sentence) {
+        this.image = image;
+        this.sentence = sentence;
+        collider = new Rectangle(x, y, image.getWidth(), image.getHeight());
+    }
+
+    @Override
+    public void dispose() {
+        image.dispose();
+    }
+
+    @Override
+    public Texture getImage() {
+        return image;
     }
 
     @Override
     public String getSentence() {
         return sentence;
-    }
-
-    @Override
-    public void setSentence(String sentence) {
-        this.sentence = sentence;
     }
 
     @Override
