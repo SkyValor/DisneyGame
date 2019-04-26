@@ -45,6 +45,9 @@ public class DarkFlorest implements Screen {
     private int backgroundX;
     private Array<Rectangle> thunders;
 
+    private Texture princessImage;
+    private Rectangle princess;
+
 
     private PrincessOneDream princessOneDream;
 
@@ -86,6 +89,9 @@ public class DarkFlorest implements Screen {
         backgroundX = 0;
         sound = Gdx.audio.newSound(Gdx.files.internal("Thunder  Lightning .mp3"));
 
+        princessImage = new Texture("castelo.png");
+        princess = new Rectangle(4000, groundHeight, princessImage.getWidth(), princessImage.getHeight());
+
         spawn();
 
 
@@ -106,6 +112,8 @@ public class DarkFlorest implements Screen {
         for(Rectangle thunder: thunders){
             batch.draw(this.thunder,thunder.x,thunder.y);
         }
+
+        batch.draw(princessImage, princess.x, princess.y);
 
 
         userInputs();
@@ -142,8 +150,15 @@ public class DarkFlorest implements Screen {
             }
 
         }
-        if (TimeUtils.nanoTime() - thunderRate > 1000000000) {
+        if (TimeUtils.nanoTime() - thunderRate > 1500000000) {
             spawn();
+        }
+    }
+
+    private void moveThundersSideways(float deltaX) {
+
+        for (Rectangle thunder : thunders) {
+            thunder.x += deltaX;
         }
     }
 
@@ -181,6 +196,7 @@ public class DarkFlorest implements Screen {
         batch.dispose();
         img.dispose();
         background.dispose();
+        princessImage.dispose();
 
     }
 
@@ -222,6 +238,7 @@ public class DarkFlorest implements Screen {
 
             } else if (backgroundX + 5 <= 0) {
                 backgroundX += 5;
+                moveThundersSideways(5);
 
 
             } else {
@@ -239,11 +256,14 @@ public class DarkFlorest implements Screen {
 
             } else if ((backgroundX + background.getWidth()) - 5 >= windowWidth) {
                 backgroundX -= 5;
+                moveThundersSideways(-5);
 
             } else {
                 player.x += 400 * Gdx.graphics.getDeltaTime();
             }
         }
+
+        checkPrincessCollision();
 
         if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
 
@@ -263,6 +283,14 @@ public class DarkFlorest implements Screen {
         if (player.x > 940) {
             player.x = 940;
         }
+    }
+
+    private void checkPrincessCollision() {
+
+        if(player.overlaps(princess)) {
+            princessOneDream.setScreen(new endGame(princessOneDream));
+        }
+
     }
 
 
