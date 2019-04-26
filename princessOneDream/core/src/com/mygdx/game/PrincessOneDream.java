@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.platforms.Platform;
+import com.mygdx.game.screens.PrincessDream;
 import com.mygdx.game.screens.StartGame;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class PrincessOneDream extends Game {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        setScreen(new StartGame(this));
+        setScreen(new PrincessDream(this));
 
 	}
 

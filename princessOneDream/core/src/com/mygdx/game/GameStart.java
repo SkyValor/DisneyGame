@@ -175,7 +175,7 @@ public class GameStart implements Screen {
         if(Gdx.input.isKeyPressed(Input.Keys.Q)){
             System.exit(0);
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.R)){
+        if(Gdx.input.isKeyPressed(Input.Keys.S)){
             princessOneDream.setScreen(new YelloFlorest(princessOneDream));
         }
 

@@ -6,8 +6,13 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.mygdx.game.PrincessOneDream;
+
+import java.util.Iterator;
 
 public class DarkFlorest implements Screen {
 
@@ -15,6 +20,7 @@ public class DarkFlorest implements Screen {
     private final float groundHeight = 100;
     private SpriteBatch batch;
 
+    private Texture thunder;
     private Texture img;
     private Rectangle player;
     private boolean isJumping;
@@ -24,10 +30,12 @@ public class DarkFlorest implements Screen {
     private float jumpDistance;
     private final float defaultJumpDistance = 7;
     private float maxJumpHeight;
+    private long thunderRate;
 
 
     private Texture background;
     private int backgroundX;
+    private Array<Rectangle> thunders;
 
 
     private PrincessOneDream princessOneDream;
@@ -45,15 +53,19 @@ public class DarkFlorest implements Screen {
     public void create() {
 
         img = new Texture("walking3.png");
-
+        thunder = new Texture("bunny2.png");
         player = new Rectangle();
         player.x = 10;
         player.y = groundHeight;
         player.width = img.getWidth();
         player.height = img.getHeight();
 
+        thunders = new Array<>();
+
         background = new Texture("forestBuilt_dark.jpeg");
         backgroundX = 0;
+
+        spawn();
 
 
 	}
@@ -67,11 +79,49 @@ public class DarkFlorest implements Screen {
         batch.begin();
         batch.draw(background, backgroundX, 0);
         batch.draw(img, player.x, player.y);
+        for(Rectangle thunder: thunders){
+            batch.draw(this.thunder,thunder.x,thunder.y);
+        }
+
 
         userInputs();
         jump();
+        moveDrops();
         batch.end();
     }
+    private void spawn() {
+        Rectangle thunder = new Rectangle();
+        thunder.x = MathUtils.random(0,900);
+        thunder.y = 600;
+        thunder.width = 30;
+        thunder.height = 30;
+        thunders.add(thunder);
+        thunderRate = TimeUtils.nanoTime();
+    }
+    private void moveDrops() {
+
+        Iterator<Rectangle> iterator = thunders.iterator();
+
+        while (iterator.hasNext()) {
+
+            Rectangle thunder = iterator.next();
+            thunder.y -= 200 * Gdx.graphics.getDeltaTime();
+
+            if (thunder.y + 30 < 0) {
+                iterator.remove();
+            }
+
+            if (thunder.overlaps(player)) {
+                iterator.remove();
+            }
+
+        }
+        if (TimeUtils.nanoTime() - thunderRate > 1000000000) {
+            spawn();
+        }
+    }
+
+
 
     @Override
     public void show() {
