@@ -257,7 +257,9 @@ public class YellowFlorest implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
             System.exit(0);
         }
-
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            princessOneDream.setScreen(new DarkFlorest(princessOneDream));
+        }
 
 
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {

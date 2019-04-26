@@ -45,8 +45,8 @@ public class DarkFlorest implements Screen {
     private int backgroundX;
     private Array<Rectangle> thunders;
 
-    private Texture princessImage;
-    private Rectangle princess;
+    private Texture towerImage;
+    private Rectangle tower;
 
 
     private PrincessOneDream princessOneDream;
@@ -59,7 +59,7 @@ public class DarkFlorest implements Screen {
         isGrounded = false;
         jumpDistance = defaultJumpDistance;
         create();
-        life = 10;
+        life = 3;
     }
 
     public void create() {
@@ -89,8 +89,8 @@ public class DarkFlorest implements Screen {
         backgroundX = 0;
         sound = Gdx.audio.newSound(Gdx.files.internal("Thunder  Lightning .mp3"));
 
-        princessImage = new Texture("castelo.png");
-        princess = new Rectangle(4000, groundHeight, princessImage.getWidth(), princessImage.getHeight());
+        towerImage = new Texture("castelo.png");
+        tower = new Rectangle(4000, groundHeight, towerImage.getWidth(), towerImage.getHeight());
 
         spawn();
 
@@ -113,14 +113,23 @@ public class DarkFlorest implements Screen {
             batch.draw(this.thunder,thunder.x,thunder.y);
         }
 
-        batch.draw(princessImage, princess.x, princess.y);
+        batch.draw(towerImage, tower.x, tower.y);
 
-
+        checkLifePoints();
         userInputs();
         jump();
         moveDrops();
         batch.end();
     }
+
+    private void checkLifePoints() {
+
+        if (life == 0) {
+            princessOneDream.setScreen(new DarkFlorest(princessOneDream));
+        }
+
+    }
+
     private void spawn() {
         Rectangle thunder = new Rectangle();
         thunder.x = MathUtils.random(0,900);
@@ -196,7 +205,7 @@ public class DarkFlorest implements Screen {
         batch.dispose();
         img.dispose();
         background.dispose();
-        princessImage.dispose();
+        towerImage.dispose();
 
     }
 
@@ -238,6 +247,7 @@ public class DarkFlorest implements Screen {
 
             } else if (backgroundX + 5 <= 0) {
                 backgroundX += 5;
+                tower.x += 5;
                 moveThundersSideways(5);
 
 
@@ -256,6 +266,7 @@ public class DarkFlorest implements Screen {
 
             } else if ((backgroundX + background.getWidth()) - 5 >= windowWidth) {
                 backgroundX -= 5;
+                tower.x -= 5;
                 moveThundersSideways(-5);
 
             } else {
@@ -287,7 +298,7 @@ public class DarkFlorest implements Screen {
 
     private void checkPrincessCollision() {
 
-        if(player.overlaps(princess)) {
+        if(player.overlaps(tower)) {
             princessOneDream.setScreen(new endGame(princessOneDream));
         }
 
