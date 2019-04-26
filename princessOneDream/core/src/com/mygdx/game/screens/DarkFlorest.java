@@ -75,7 +75,7 @@ public class DarkFlorest implements Screen {
             }
         }
 
-        animation = new Animation<>(1f/4f,animationFrames);
+        animation = new Animation<TextureRegion>(1f/4f,animationFrames);
         thunder = new Texture("thunder.png");
         player = new Rectangle();
         player.x = 10;
@@ -83,7 +83,7 @@ public class DarkFlorest implements Screen {
         player.width = 103;
         player.height = 190;
 
-        thunders = new Array<>();
+        thunders = new Array<Rectangle>();
 
         background = new Texture("forestBuilt_dark.jpeg");
         backgroundX = 0;

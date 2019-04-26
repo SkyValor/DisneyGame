@@ -88,7 +88,7 @@ public class GameStart implements Screen {
             }
         }
 
-        animation = new Animation<>(1f / 4f, animationFrames);
+        animation = new Animation<TextureRegion>(1f / 4f, animationFrames);
 
 
         font = new BitmapFont();
@@ -125,7 +125,7 @@ public class GameStart implements Screen {
         bunny2.setId(3);
 
         bird3 = new AnimalImpl(3780, 500, new Texture("bird.png"), Messages.SLEEP);
-        bird3.setId(1);
+        bird3.setId(6);
 
 
         bunny = new AnimalImpl(5000, groundHeight, new Texture("bunny.png"), Messages.NEXTLEVEL);
@@ -135,7 +135,7 @@ public class GameStart implements Screen {
         animalIcon = new AnimalIcon();
         animalIcons = animalIcon.getAnimalList();
 
-        animals = new ArrayList<>();
+        animals = new ArrayList<Animal>();
         animals.add(squirrel);
         animals.add(bird);
         animals.add(owl);
@@ -148,7 +148,7 @@ public class GameStart implements Screen {
         smallPlatform = new Texture("asset_small.png");
         bigPlatform = new Texture("asset_big.png");
 
-        platforms = new ArrayList<>();
+        platforms = new ArrayList<Platform>();
         platforms.add(new BigPlatform(100, 450));
         platforms.add(new SmallPlatform(540, 450));
         platforms.add(new BigPlatform(700, 300));

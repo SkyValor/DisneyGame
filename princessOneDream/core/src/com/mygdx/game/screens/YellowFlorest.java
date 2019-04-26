@@ -86,7 +86,7 @@ public class YellowFlorest implements Screen {
             }
         }
 
-        animation = new Animation<>(1f / 4f, animationFrames);
+        animation = new Animation<TextureRegion>(1f / 4f, animationFrames);
 
 
         font = new BitmapFont();
@@ -125,7 +125,7 @@ public class YellowFlorest implements Screen {
         bunny = new AnimalImpl(5000, groundHeight, new Texture("bunny.png"), Messages.thunderKill);
         bunny.setId(5);
 
-        animals = new ArrayList<>();
+        animals = new ArrayList<Animal>();
         animals.add(squirrel);
         animals.add(bird);
         animals.add(owl);
@@ -138,7 +138,7 @@ public class YellowFlorest implements Screen {
         smallPlatform = new Texture("asset_small.png");
         bigPlatform = new Texture("asset_big.png");
 
-        platforms = new ArrayList<>();
+        platforms = new ArrayList<Platform>();
         platforms.add(new BigPlatform(200, 150));
         platforms.add(new SmallPlatform(550, 215));
         platforms.add(new SmallPlatform(880, 350));
