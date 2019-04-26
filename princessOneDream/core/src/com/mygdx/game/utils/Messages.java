@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.utils;
 
 public class Messages {
     public static final String HELLO = "Hello Prince!" +

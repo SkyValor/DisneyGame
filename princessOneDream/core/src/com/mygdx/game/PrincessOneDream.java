@@ -10,7 +10,15 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.animals.Animal;
+import com.mygdx.game.animals.AnimalImpl;
 import com.mygdx.game.platforms.Platform;
+import com.mygdx.game.platforms.PlatformType;
+import com.mygdx.game.platforms.SmallPlatform;
+import com.mygdx.game.player.Direction;
+import com.mygdx.game.player.Player;
+import com.mygdx.game.utils.CollisionDetector;
+import com.mygdx.game.utils.Messages;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,73 +27,78 @@ public class PrincessOneDream extends ApplicationAdapter {
 
     private final float windowWidth = 1200;
     private final float groundHeight = 100;
+    private final float defaultJumpDistance = 7;
     private SpriteBatch batch;
 
-    private Texture img;
-    private Rectangle player;
-    private boolean isJumping;
-    private boolean isFalling;
-    private boolean isGrounded;
-
+    private Texture playerImage;
+    private Player player;
     private float jumpDistance;
-    private final float defaultJumpDistance = 7;
     private float maxJumpHeight;
 
     private String text;
     private BitmapFontCache cache;
     private BitmapFont font;
 
-    private Rectangle animalRec;
-    private Texture animalTex;
+    private Animal cow;
+    private Texture cowImage;
 
     private Texture background;
     private int backgroundX;
 
     private Texture smallPlatform;
     private Texture bigPlatform;
-    private List<Rectangle> smallPlatforms;
-    private List<Rectangle> bigPlatforms;
 
-    public PrincessOneDream(){
-        isFalling = false;
-        isJumping = false;
-        isGrounded = false;
+    private List<Platform> platforms;
+    private List<Animal> animals;
+
+    public PrincessOneDream() {
         jumpDistance = defaultJumpDistance;
     }
 
     @Override
     public void create() {
+
         batch = new SpriteBatch();
-        img = new Texture("walking3.png");
-        animalTex = new Texture("cow2.png");
 
         font = new BitmapFont();
         text = "";
         cache = font.newFontCache();
 
-        animalRec = new Rectangle();
-        animalRec.x = 400;
-        animalRec.y = groundHeight;
-        animalRec.width = animalTex.getWidth();
-        animalRec.height = animalTex.getHeight();
+        //
+        // PLAYER
 
-        player = new Rectangle();
-        player.x = 10;
-        player.y = groundHeight;
-        player.width = img.getWidth();
-        player.height = img.getHeight();
+        playerImage = new Texture("walking3.png");
+        player = new Player(10, groundHeight, playerImage.getWidth(), playerImage.getHeight(), Direction.RIGHT);
+
+        player.setFalling(false);
+        player.setGrounded(false);
+        player.setPlatformToIgnore(null);
+
+        //
+        // ANIMALS
+
+        cowImage = new Texture("cow2.png");
+        cow = new AnimalImpl(400, groundHeight, cowImage.getWidth(), cowImage.getHeight(), Messages.HELLO);
+
+        animals = new ArrayList<>();
+        animals.add(cow);
+
+        //
+        // BACKGROUND
 
         background = new Texture("forestBuilt.jpeg");
         backgroundX = 0;
 
+        //
+        // PLATFORMS
+
         smallPlatform = new Texture("asset_small.png");
         bigPlatform = new Texture("asset_big.png");
-        smallPlatforms = new ArrayList<>();
-        bigPlatforms = new ArrayList<>();
 
-        smallPlatforms.add(new Rectangle(300, 100, 110, 60));
-        smallPlatforms.add(new Rectangle(600, 350, 110, 60));
-	}
+        platforms = new ArrayList<>();
+        platforms.add(new SmallPlatform(100, 450));
+        platforms.add(new SmallPlatform(600, 350));
+    }
 
     @Override
     public void render() {
@@ -95,24 +108,36 @@ public class PrincessOneDream extends ApplicationAdapter {
 
         batch.begin();
         batch.draw(background, backgroundX, 0);
-        batch.draw(img, player.x, player.y);
-        batch.draw(animalTex, animalRec.x, animalRec.y);
 
-        for (Rectangle platform : smallPlatforms) {
-            batch.draw(smallPlatform, platform.x, platform.y, 110, 60);
+        for (Platform platform : platforms) {
+
+            if (platform.getType().equals(PlatformType.SMALL)) {
+                batch.draw(smallPlatform, platform.getCollider().x, platform.getCollider().y, platform.getWidth(), platform.getHeight());
+            }
         }
+
+        for (Animal animal : animals) {
+            batch.draw(cowImage, animal.getCollider().x, animal.getCollider().y);
+        }
+
+        batch.draw(playerImage, player.getX(), player.getY());
 
         userInputs();
         jump();
+
         batch.end();
     }
 
     @Override
     public void dispose() {
+
         batch.dispose();
-        img.dispose();
+
+        playerImage.dispose();
         background.dispose();
-        animalTex.dispose();
+
+        cowImage.dispose();
+
         smallPlatform.dispose();
         bigPlatform.dispose();
     }
@@ -124,7 +149,7 @@ public class PrincessOneDream extends ApplicationAdapter {
      */
     private boolean playerIsAtCenter() {
 
-        float playerCenter = (player.x + (player.x + player.width)) / 2;
+        float playerCenter = (player.getX() + (player.getX() + player.getCollider().getWidth())) / 2;
         float windowCenter = windowWidth / 2;
         int toleranceMargin = 30;
 
@@ -143,73 +168,160 @@ public class PrincessOneDream extends ApplicationAdapter {
 
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
 
-            Rectangle mockRectangle = new Rectangle(player.x - 400 * Gdx.graphics.getDeltaTime(), player.y, player.width, player.height);
+            // Check if player will collide with something on this movement
 
-            if (CollisionDetector.playerAndPlatforms(mockRectangle, smallPlatforms, bigPlatforms)) {
+            Rectangle mockRectangle = new Rectangle(player.getX() - 400 * Gdx.graphics.getDeltaTime(),
+                                                       player.getY(), player.getCollider().width,player.getCollider().height);
+
+            Platform collided = CollisionDetector.playerAndPlatforms(mockRectangle, platforms);
+            if (collided != null) {
                 return;
             }
 
+            // Move the player if it's not on the center of window
+
             if (!playerIsAtCenter()) {
-                player.x -= 400 * Gdx.graphics.getDeltaTime();
+                player.getCollider().x -= 400 * Gdx.graphics.getDeltaTime();
+
+            // Move the background if there is some of it out-of-bounds
+            // Move animals and platforms as well
 
             } else if (backgroundX + 5 <= 0) {
                 backgroundX += 5;
-                animalRec.x += 5;
+                moveAnimals(5);
                 movePlatforms(5);
 
+            // Otherwise, just keep moving the player
+
             } else {
-                player.x -= 400 * Gdx.graphics.getDeltaTime();
+                player.getCollider().x -= 400 * Gdx.graphics.getDeltaTime();
             }
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
 
-            Rectangle mockRectangle = new Rectangle(player.x + 400 * Gdx.graphics.getDeltaTime(), player.y, player.width, player.height);
+            // Check if player will collide with something on this movement
 
-            if (CollisionDetector.playerAndPlatforms(mockRectangle, smallPlatforms, bigPlatforms)) {
+            Rectangle mockRectangle = new Rectangle(player.getX() + 400 * Gdx.graphics.getDeltaTime(),
+                                                       player.getY(), player.getCollider().width, player.getCollider().height);
+
+            Platform collided = CollisionDetector.playerAndPlatforms(mockRectangle, platforms);
+            if (collided != null) {
                 return;
             }
 
+            // Move the player if it's not on the center of window
+
             if (!playerIsAtCenter()) {
-                player.x += 400 * Gdx.graphics.getDeltaTime();
+                player.getCollider().x += 400 * Gdx.graphics.getDeltaTime();
+
+            // Move the background if there is some of it out-of-bounds
+            // Move animals and platforms as well
 
             } else if ((backgroundX + background.getWidth()) - 5 >= windowWidth) {
                 backgroundX -= 5;
-                animalRec.x -= 5;
+                moveAnimals(-5);
                 movePlatforms(-5);
 
+            // Otherwise, just keep moving the player
+
             } else {
-                player.x += 400 * Gdx.graphics.getDeltaTime();
+                player.getCollider().x += 400 * Gdx.graphics.getDeltaTime();
             }
         }
+
+        // AFTER ALL MOVEMENTS ON LEFT or RIGHT
+
+        checkGrounding();
 
         if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
 
-            if (!isJumping) {
-                isJumping = true;
-                isGrounded = false;
-                maxJumpHeight = player.y + 200;
+            // Initiate a jumping sequence
+
+            if (!player.isJumping()) {
+                player.setJumping(true);
+                player.setGrounded(false);
+                maxJumpHeight = player.getCollider().y + 200;
             }
         }
 
-        if (player.overlaps(animalRec) ) {
+        checkInteractionWithAnimals();
 
-            if (player.x < animalRec.x){
-                player.x = animalRec.getX() - player.width;
+        if (player.getX() < 0) {
+            player.getCollider().x = 0;
+        }
 
-            } else {
-                player.x = animalRec.getX() + animalRec.width;
+        if (player.getX() > 940) {
+            player.getCollider().x = 940;
+        }
+    }
+
+
+    /**
+     * Checks if the player has ground underneath.
+     * Calls falldown() when not
+     */
+    private void checkGrounding() {
+
+        if (!player.isGrounded()) {
+            return;
+        }
+
+        Rectangle mockCollider = new Rectangle(player.getX(), player.getY() - 10,
+                                               player.getCollider().width, player.getCollider().height);
+
+        player.setPlatformToIgnore(CollisionDetector.playerAndPlatforms(mockCollider, platforms));
+        if (player.getPlatformToIgnore() == null && player.getY() > groundHeight) {
+            player.setGrounded(false);
+            fallDown();
+        }
+
+
+        // dont forget to set the platform to ignore
+    }
+
+    private void checkInteractionWithAnimals() {
+
+        for (Animal animal : animals) {
+
+            if (player.getCollider().overlaps(animal.getCollider())) {
+                repositionPlayer(animal);
+                renderSingleLine(animal);
             }
+        }
+    }
 
-            renderSingleLine();
+    public void repositionPlayer(Animal animal) {
+
+        if (player.getX() < animal.getCollider().x) {
+            player.getCollider().x = animal.getCollider().x - player.getCollider().width;
         }
 
-        if (player.x < 0) {
-            player.x = 0;
+        else {
+            player.getCollider().x = animal.getCollider().x + animal.getCollider().width;
         }
 
-        if (player.x > 940) {
-            player.x = 940;
+    }
+
+    /**
+     * Makes the player start a fall
+     */
+    private void fallDown() {
+
+        player.setFalling(true);
+        player.setJumping(true);
+        jumpDistance = -1;
+    }
+
+    /**
+     * Moves all animals according to player input, when necessary
+     *
+     * @param deltaX the distance to move in the X-axis
+     */
+    private void moveAnimals(float deltaX) {
+
+        for (Animal animal : animals) {
+            animal.getCollider().x += deltaX;
         }
     }
 
@@ -220,12 +332,8 @@ public class PrincessOneDream extends ApplicationAdapter {
      */
     private void movePlatforms(float deltaX) {
 
-        for (Rectangle platform : smallPlatforms) {
-            platform.x += deltaX;
-        }
-
-        for (Rectangle platform : bigPlatforms) {
-            platform.x += deltaX;
+        for (Platform platform : platforms) {
+            platform.getCollider().x += deltaX;
         }
     }
 
@@ -236,55 +344,64 @@ public class PrincessOneDream extends ApplicationAdapter {
     private void jump() {
 
         // if player is not in mid-air, ignore this method
-        if(!isJumping){
+        if (!player.isJumping()) {
             return;
         }
 
-        player.y += jumpDistance;
+        player.getCollider().y += jumpDistance;
 
         // if player is going up, decrement the amount of travel distance for each tick
         // until a maximum value
-        if(!isFalling && jumpDistance >= 0.5){
-            jumpDistance -=0.1;
+        if (!player.isFalling() && jumpDistance >= 0.5) {
+            jumpDistance -= 0.1;
 
         }
 
         // if the player is going down, increment the amount of travel distance for each tick
         // until a maximum value
-        if (isFalling && jumpDistance <= -0.5){
+        if (player.isFalling() && jumpDistance <= -0.5) {
             jumpDistance -= 0.1;
         }
 
         // if player reaches its target Y while going up, invert the travel direction
-        if(!isFalling && player.y >= maxJumpHeight){
-            isFalling = true;
+        if (!player.isFalling() && player.getY() >= maxJumpHeight) {
+            player.setFalling(true);
             jumpDistance *= -1;
         }
 
-        Platform targetPlatform = CollisionDetector.playerFallsOnPlatform(player, smallPlatforms, bigPlatforms);
         // if player is falling and the feet collide with a platform, return to idle state
-        if (isFalling && targetPlatform != null) {
-            returnToIdleState(targetPlatform.getY());
+        Platform targetPlatform = CollisionDetector.playerFallsOnPlatform(player.getCollider(), platforms);
+        if (player.isFalling() && targetPlatform != null) {
+            returnToIdleState(targetPlatform.getCollider().y + targetPlatform.getCollider().getHeight());
         }
 
         // if player is falling and reaches ground level, return to idle state
-        if(isFalling && player.y <= groundHeight){
+        if (player.isFalling() && player.getY() <= groundHeight) {
             returnToIdleState(groundHeight);
         }
     }
 
+    /**
+     * Returns the player's jumping conditionals to their original values,
+     * updating the player's Y value to the new target
+     *
+     * @param targetY the value to be maintained in the player's y
+     */
     private void returnToIdleState(float targetY) {
 
-        player.y = targetY;
+        player.getCollider().y = targetY;
         jumpDistance = defaultJumpDistance;
-        isFalling = false;
-        isJumping = false;
-        isGrounded = true;
+        player.setFalling(false);
+        player.setJumping(false);
+        player.setGrounded(true);
     }
 
-    private void renderSingleLine() {
-        text = "gay";
-        cache.setText(Messages.HELLO, animalRec.getX() + 10, animalRec.getY() + animalRec.height + 35);
+    /**
+     * Renders the animal's line on top of it [TESTING ONLY]
+     */
+    private void renderSingleLine(Animal animal) {
+        text = "something";
+        cache.setText(Messages.HELLO, animal.getCollider().x + 10, animal.getCollider().y + animal.getCollider().height + 35);
         cache.setColors(Color.WHITE);
 
         cache.draw(batch);
